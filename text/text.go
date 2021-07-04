@@ -47,6 +47,7 @@ type filesLoader struct {
 	c FilesConfig
 }
 
+// NewFilesLoader creates a new loader loading templates from files with c as the configuration.
 func NewFilesLoader(c FilesConfig) decor.Loader {
 	return &filesLoader{
 		c: c,
