@@ -30,7 +30,7 @@ type Loader interface {
 	Load(name string, funcs FuncMap) (Template, error)
 }
 
-// Templates implements loading, caching and exection of named templates.
+// Templates implements loading, caching and execution of named templates.
 type Templates struct {
 	// When set to true DevelMode puts these templates into development mode, which
 	// causes errors during rendering being written to the target writer as well
@@ -63,7 +63,7 @@ func (t *Templates) ExecuteTemplate(w io.Writer, templateName string, data inter
 // SendHTML executes the template named templateName with the given data (using Repository.ExecuteTemplate).
 // It writes the rendered output to w after setting the responsive HTTP content headers.
 // This method pays attention to the r's DevelMode: When activated any error produced from rendering the
-// template will be send as the http reponse. When DevelopMode is false, any error will be suppressed
+// template will be send as the http response. When DevelopMode is false, any error will be suppressed
 // possibly resulting in an empty response.
 func (t *Templates) SendHTML(w http.ResponseWriter, templateName string, data interface{}) {
 	var buf bytes.Buffer
