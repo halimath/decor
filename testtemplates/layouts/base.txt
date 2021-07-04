@@ -1,0 +1,1 @@
+{{define "base"}}Hello, {{ template "greeting" .}}!{{end}}
