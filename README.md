@@ -32,13 +32,10 @@ capabilities to load layout files as well.
 
 ```go
 tpls := decor.Templates{
-    Loader: text.NewFilesLoader(text.FilesConfig{
-        TemplatesPattern: "%s.txt",
-        BasePath:         "testtemplates",
-        IncludePaths: []string{
-            "layouts/base.txt",
-        },
-    }),
+    Includes: []string{
+        "layouts/base",
+    },
+    Loader: text.NewFilesLoader("%s.txt", "testtemplates"),
 }
 
 if err := tpls.ExecuteTemplate(os.Stdout, "a", "world"); err != nil {

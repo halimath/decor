@@ -33,10 +33,10 @@ type ldr struct {
 	loadCount map[string]int
 }
 
-func (l *ldr) Load(name string, funcs FuncMap) (Template, error) {
-	l.loadCount[name] = l.loadCount[name] + 1
+func (l *ldr) Load(names []string, funcs FuncMap) (Template, error) {
+	l.loadCount[names[0]] = l.loadCount[names[0]] + 1
 
-	return &tpl{name}, nil
+	return &tpl{names[0]}, nil
 }
 
 var _ Loader = &ldr{}

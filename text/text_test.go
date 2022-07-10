@@ -4,73 +4,13 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/go-test/deep"
 	"github.com/halimath/decor"
 )
 
-func TestFilesConfig_TemplatePath(t *testing.T) {
-	c := FilesConfig{
-		TemplatesPattern: "%s.tpl",
-		BasePath:         "foo/bar",
-	}
-
-	act := c.TemplatePath("spam")
-
-	if act != "foo/bar/spam.tpl" {
-		t.Errorf("unexpected path: '%s'", act)
-	}
-}
-
-func TestFilesConfig_TemplatePaths_basePath(t *testing.T) {
-	c := FilesConfig{
-		TemplatesPattern: "%s.tpl",
-		BasePath:         "foo/bar",
-		IncludePaths: []string{
-			"inc/1.tpl",
-			"inc/2.tpl",
-		},
-	}
-
-	act := c.TemplatePaths("spam")
-
-	if diff := deep.Equal(act, []string{
-		"foo/bar/spam.tpl",
-		"foo/bar/inc/1.tpl",
-		"foo/bar/inc/2.tpl",
-	}); diff != nil {
-		t.Error(diff)
-	}
-}
-
-func TestFilesConfig_TemplatePaths_noBasePath(t *testing.T) {
-	c := FilesConfig{
-		TemplatesPattern: "%s.tpl",
-		IncludePaths: []string{
-			"inc/1.tpl",
-			"inc/2.tpl",
-		},
-	}
-
-	act := c.TemplatePaths("spam")
-
-	if diff := deep.Equal(act, []string{
-		"spam.tpl",
-		"inc/1.tpl",
-		"inc/2.tpl",
-	}); diff != nil {
-		t.Error(diff)
-	}
-}
-
 func TestNewFilesLoader(t *testing.T) {
 	tpls := decor.Templates{
-		Loader: NewFilesLoader(FilesConfig{
-			TemplatesPattern: "%s.txt",
-			BasePath:         "../testtemplates",
-			IncludePaths: []string{
-				"layouts/base.txt",
-			},
-		}),
+		Includes: []string{"layouts/base"},
+		Loader:   NewFilesLoader("%s.txt", "../testtemplates"),
 	}
 
 	var w strings.Builder

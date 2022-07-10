@@ -3,67 +3,42 @@ package text
 
 import (
 	"fmt"
-	"path"
+	"io/fs"
+	"os"
 	"text/template"
 
 	"github.com/halimath/decor"
 )
 
-// FilesConfig implements the configuration used by the FSLoader to load templates
-// from files.
-type FilesConfig struct {
-	// TemplatesPattern is a string template containing a single %s placeholder to
-	// be replaced with the template name to load and should resolve to the file
-	// name for loading the named template.
-	TemplatesPattern string
-
-	// BasePath is used as the root for all templates to load, both by pattern
-	// and by includes.
-	BasePath string
-
-	// IncludePaths defines a list of static paths to include with every template
-	// to load.
-	IncludePaths []string
+type fsLoader struct {
+	pattern string
+	fsys    fs.FS
 }
 
-// TemplatePath resolves the templateName to a path to load the corresponding template from.
-func (c *FilesConfig) TemplatePath(templateName string) string {
-	return path.Join(c.BasePath, fmt.Sprintf(c.TemplatesPattern, templateName))
-}
-
-// TemplatePaths resolves the templateName to a path to load the corresponding template from.
-func (c *FilesConfig) TemplatePaths(templateName string) []string {
-	r := make([]string, len(c.IncludePaths)+1)
-	r[0] = c.TemplatePath(templateName)
-
-	for i, p := range c.IncludePaths {
-		r[i+1] = path.Join(c.BasePath, p)
-	}
-
-	return r
-}
-
-type filesLoader struct {
-	c FilesConfig
-}
-
-// NewFilesLoader creates a new loader loading templates from files with c as the configuration.
-func NewFilesLoader(c FilesConfig) decor.Loader {
-	return &filesLoader{
-		c: c,
+func NewFSLoader(templateNamePattern string, fsys fs.FS) decor.Loader {
+	return &fsLoader{
+		pattern: templateNamePattern,
+		fsys:    fsys,
 	}
 }
 
-var _ decor.Loader = &filesLoader{}
+func NewFilesLoader(templateNamePattern, rootDir string) decor.Loader {
+	return NewFSLoader(templateNamePattern, os.DirFS(rootDir))
+}
 
-func (l *filesLoader) Load(templateName string, f decor.FuncMap) (decor.Template, error) {
-	t, err := template.ParseFiles(l.c.TemplatePaths(templateName)...)
+func (l *fsLoader) Load(names []string, funcs decor.FuncMap) (decor.Template, error) {
+	paths := make([]string, len(names))
+	for i, n := range names {
+		paths[i] = fmt.Sprintf(l.pattern, n)
+	}
+
+	t, err := template.ParseFS(l.fsys, paths...)
 	if err != nil {
 		return nil, err
 	}
 
-	if f != nil {
-		t = t.Funcs(template.FuncMap(f))
+	if funcs != nil {
+		t = t.Funcs(template.FuncMap(funcs))
 	}
 
 	return t, nil

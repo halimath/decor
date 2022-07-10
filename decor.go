@@ -12,8 +12,8 @@ import (
 // FuncMap defines a map of template functions.
 type FuncMap map[string]interface{}
 
-// Template defines an internal abstraction for templates provided either by package text/template
-// or html/template or a custom template rendering engine.
+// Template defines an internal abstraction for templates provided either by package text/template or
+// html/template or a custom template rendering engine.
 type Template interface {
 	// Execute executes the template rendering content using data and
 	// writing the output to wr. It returns an error in case of an error
@@ -21,13 +21,13 @@ type Template interface {
 	Execute(wr io.Writer, data interface{}) error
 }
 
-// Loader defines the interface for implementations that load Template values
-// from a source. Templates are loaded by name.
+// Loader defines the interface for implementations that load Template values from a source. Templates are
+// loaded by name.
 type Loader interface {
-	// Loads the template named name and returns it. If funcs is a non-nil, non-empty map
-	// the contained functions must be made available to the template.
-	// Returns a non-nil error to indicate that loading failed.
-	Load(name string, funcs FuncMap) (Template, error)
+	// Loads the templates named names and returns them. If funcs is a non-nil, non-empty map the contained
+	// functions must be made available to the template. Returns a non-nil error to indicate that loading
+	// failed.
+	Load(names []string, funcs FuncMap) (Template, error)
 }
 
 // Templates implements loading, caching and execution of named templates.
@@ -44,6 +44,10 @@ type Templates struct {
 
 	// Loader is used to load Templates when requested.
 	Loader Loader
+
+	// Includes contains a list of template names to load with every template, such as helper templates or
+	// layouts.
+	Includes []string
 
 	lock  sync.RWMutex
 	cache map[string]Template
@@ -91,8 +95,12 @@ func (t *Templates) SendHTML(w http.ResponseWriter, templateName string, data in
 // template loader. When set to false, templates are loaded on first
 // invocation and are then stored and reused from a synchronized cache.
 func (t *Templates) loadTemplate(name string) (tpl Template, err error) {
+	names := make([]string, len(t.Includes)+1)
+	names[0] = name
+	copy(names[1:], t.Includes)
+
 	if t.DevelMode {
-		tpl, err = t.Loader.Load(name, t.Funcs)
+		tpl, err = t.Loader.Load(names, t.Funcs)
 		return
 	}
 
@@ -120,7 +128,7 @@ func (t *Templates) loadTemplate(name string) (tpl Template, err error) {
 		}
 	}
 
-	tpl, err = t.Loader.Load(name, t.Funcs)
+	tpl, err = t.Loader.Load(names, t.Funcs)
 	if err != nil {
 		return
 	}
