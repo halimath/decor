@@ -19,7 +19,7 @@ experience.
 $ go get github.com/halimath/decor
 ```
 
-Decor requires go >= 1.14.
+Decor requires go >= 1.16.
 
 ## Usage
 
@@ -77,8 +77,7 @@ client for debugging. When not in development mode, errors will be logged and th
 ## Development
 
 The files in package `html` are generated from the corresponding files in package `text`. The code 
-generation tool can be found in `cmd/gen-html`. In order to run this tool, you need Go >= 1.16. The
-resulting code will work with Go >= 1.14.
+generation tool can be found in `cmd/gen-html`. 
 
 ## License
 
